@@ -10,7 +10,7 @@ import FirebaseAuth
 
 struct RegisterView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var registerVM = registerViewModel()
+    @StateObject private var registerVM = RegisterViewModel()
 
     @State private var email = ""
     @State private var password = ""
