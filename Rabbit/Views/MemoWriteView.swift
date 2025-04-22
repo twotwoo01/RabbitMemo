@@ -11,7 +11,7 @@ import FirebaseAuth
 
 struct MemoWriteView: View {
     var memo: Memo?
-    var userID: String
+    let userID: String
     
     @Environment(\.dismiss) private var dismiss
     // swiftData 컨텍스트

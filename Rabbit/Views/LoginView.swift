@@ -9,11 +9,15 @@ import SwiftUI
 import FirebaseAuth
 
 struct LoginView: View {
-    @StateObject private var LoginVM = LoginViewModel()
+    @StateObject private var loginVM = LoginViewModel()
     
     @State private var email: String = ""
     @State private var password: String = ""
-    @State private var loginClick = false // 로그인 버튼 클릭 여부 
+    @State private var loginClick = false // 로그인 버튼 클릭 여부
+    @State private var emailError: String = "" // 이메일 형식이 아닌 형식으로 로그인 시도했을 때
+    @State private var securePassword = false // 비밀번호 보기 눈 모양 버튼
+    @State private var errorMessage: String = "" // 로그인 시 가입 안 되어있으면 에러 문구 뜸
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -32,19 +36,40 @@ struct LoginView: View {
                             TextField("아이디를 입력해주세요.", text: $email)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .padding(.horizontal)
-                            
-                            SecureField("비밀번호를 입력해주세요.", text: $password)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .padding(.horizontal)
-                            
-
-                            Button(action: {
-                                print("ID: \(email), PW: \(password) 로그인")
-                                // 비동기로 로그인 실행
-                                Task {
-                                    await LoginVM.login(email: email, password: password)
+                        // 비밀번호 확인 버튼
+                            HStack {
+                                if securePassword {
+                                    TextField("비밀번호를 입력해주세요.", text: $password)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                } else {
+                                    SecureField("비밀번호를 입력해주세요.", text: $password)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
                                 }
-                            }) {
+                                Button {
+                                    securePassword.toggle()
+                                } label: {
+                                    Image(systemName: securePassword ? "eye.slash" : "eye")
+                                        .foregroundColor(.gray)
+                                }
+                            }
+                            .padding(.horizontal)
+                            //
+                            if !loginVM.errorMessage.isEmpty {
+                                Text(loginVM.errorMessage)
+                                    .foregroundStyle(.red)
+                                    .font(.caption)
+                            }
+                            // 이메일이 아닌 다른 형식으로 입력했을 때
+                            Button {
+                                if email.contains("@") {
+                                    Task {
+                                        await loginVM.login(email: email, password: password)
+                                    }
+                                } else {
+                                    loginVM.errorMessage = "이메일 형식으로 입력해주세요."
+                                }
+                            } label: {
                                 Text("로그인")
                                     .font(.headline)
                                     .foregroundColor(.white)
@@ -52,13 +77,15 @@ struct LoginView: View {
                                     .background(Color.gray)
                                     .cornerRadius(20)
                             }
+                            NavigationLink("회원가입", destination: RegisterView())
+                                .font(.caption)
                         }
-                    } else { // 클릭하지 않았을 때 기본 상태
-                        Button(action: {
+                    } else {
+                        Button {
                             withAnimation {
                                 loginClick = true
                             }
-                        }) {
+                        } label: {
                             Text("로그인")
                                 .font(.headline)
                                 .foregroundColor(.white)
@@ -69,13 +96,13 @@ struct LoginView: View {
                     }
                 }
             }
-            // 아이디와 비밀번호를 입력하고서 로그인 버튼을 눌러야 홈뷰로 이동
-            .navigationDestination(isPresented: $LoginVM.isLoggedIn) {
+            .navigationDestination(isPresented: $loginVM.login) {
                 HomeView()
             }
         }
     }
 }
+
 #Preview {
     LoginView()
 }

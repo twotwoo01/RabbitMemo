@@ -19,7 +19,7 @@ struct MenuSidebarView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("\(userID)")
+            Text(userEmail)
                 .font(.headline)
             
             Divider() // 제목과 내용 구분선
