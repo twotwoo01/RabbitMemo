@@ -36,7 +36,6 @@ struct LoginView: View {
                             TextField("아이디를 입력해주세요.", text: $email)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .padding(.horizontal)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
                         // 비밀번호 확인 버튼
                             HStack {
                                 if securePassword {
